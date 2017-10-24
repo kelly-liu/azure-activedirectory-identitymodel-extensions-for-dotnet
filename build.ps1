@@ -108,9 +108,6 @@ if ($clean -eq "YES")
     WriteSectionFooter("End Clean");
 }
 
-if ($build -eq "YES")
-{
-    WriteSectionHeader("Build");
     CreateFolder($artifactsRoot);
 
     $date = Get-Date
@@ -142,6 +139,9 @@ if ($build -eq "YES")
         }
     }
 
+if ($build -eq "YES")
+{
+    WriteSectionHeader("Build");
     Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'restore' $root\$slnFile"
     Start-Process -wait -NoNewWindow $dotnetexe "restore $root\$slnFile"
     Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'build' $root\$slnFile"
