@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NETSTANDARD1_4
         public ECDsa ecdsa;
 #else
-        public ECDsaCng ecdsaCng;
+        public ECDsaCng ecdsa;
 #endif
         public bool dispose;
 
@@ -59,8 +59,10 @@ namespace Microsoft.IdentityModel.Tokens
     {
 #if NETSTANDARD1_4
         public RSA rsa;
+#elif NET46
+        public RSACng rsa;
+        public RSACryptoServiceProviderProxy rsaCryptoServiceProviderProxy;
 #else
-        public RSACryptoServiceProvider rsaCryptoServiceProvider;
         public RSACryptoServiceProviderProxy rsaCryptoServiceProviderProxy;
 #endif
         public bool dispose;
@@ -322,29 +324,26 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (ecdsaKey != null)
             {
+                if (ecdsaKey.ECDsa != null && ValidateECDSAKeySize(ecdsaKey.ECDsa.KeySize, algorithm))
+                {
 #if NETSTANDARD1_4
-                if (ecdsaKey.ECDsa != null && ValidateECDSAKeySize(ecdsaKey.ECDsa.KeySize, algorithm))
-                {
                     ecdsaAlgorithm.ecdsa = ecdsaKey.ECDsa;
-                    return ecdsaAlgorithm;
-                }
-#else // net451 windows
-                if (ecdsaKey.ECDsa != null && ValidateECDSAKeySize(ecdsaKey.ECDsa.KeySize, algorithm))
-                {
-                    ecdsaAlgorithm.ecdsaCng = ecdsaKey.ECDsa as ECDsaCng;
-                    return ecdsaAlgorithm;
-                }
+#else
+                    ecdsaAlgorithm.ecdsa = ecdsaKey.ECDsa as ECDsaCng;
 #endif
+                    return ecdsaAlgorithm;
+                }
             }
 
             var webKey = key as JsonWebKey;
             if (webKey != null && webKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
             {
                 ecdsaAlgorithm.dispose = true;
+                // ??? TODO why webKey.CreateECDsa always returns ecdsaCng?
 #if NETSTANDARD1_4
                 ecdsaAlgorithm.ecdsa = webKey.CreateECDsa(algorithm, usePrivateKey);
 #else // net451 windows
-                ecdsaAlgorithm.ecdsaCng = webKey.CreateECDsa(algorithm, usePrivateKey);
+                ecdsaAlgorithm.ecdsa = webKey.CreateECDsa(algorithm, usePrivateKey);
 #endif
                 return ecdsaAlgorithm;
             }
@@ -365,8 +364,13 @@ namespace Microsoft.IdentityModel.Tokens
                 {
 #if NETSTANDARD1_4
                     rsaAlgorithm.rsa = rsaKey.Rsa;
+#elif NET46
+                    if (rsaKey.Rsa as RSACryptoServiceProvider != null)
+                        rsaAlgorithm.rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsaKey.Rsa as RSACryptoServiceProvider);
+                    else
+                        rsaAlgorithm.rsa = rsaKey.Rsa as RSACng;
 #else
-                    rsaAlgorithm.rsaCryptoServiceProvider = rsaKey.Rsa as RSACryptoServiceProvider;
+                    rsaAlgorithm.rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsaKey.Rsa as RSACryptoServiceProvider);
 #endif
                     return rsaAlgorithm;
                 }
@@ -377,8 +381,9 @@ namespace Microsoft.IdentityModel.Tokens
                     rsaAlgorithm.rsa.ImportParameters(rsaKey.Parameters);
                     rsaAlgorithm.dispose = true;
 #else
-                    rsaAlgorithm.rsaCryptoServiceProvider = new RSACryptoServiceProvider();
-                    (rsaAlgorithm.rsaCryptoServiceProvider as RSA).ImportParameters(rsaKey.Parameters);
+                    var rsaCryptoServiceProvider = new RSACryptoServiceProvider();
+                    (rsaCryptoServiceProvider as RSA).ImportParameters(rsaKey.Parameters);
+                    rsaAlgorithm.rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsaCryptoServiceProvider);
                     rsaAlgorithm.dispose = true;
 #endif
                 }
@@ -414,8 +419,9 @@ namespace Microsoft.IdentityModel.Tokens
                     rsaAlgorithm.rsa.ImportParameters(parameters);
 #else
                 RSAParameters parameters = webKey.CreateRsaParameters();
-                rsaAlgorithm.rsaCryptoServiceProvider = new RSACryptoServiceProvider();
-                (rsaAlgorithm.rsaCryptoServiceProvider as RSA).ImportParameters(parameters);
+                var rsaCryptoServiceProvider = new RSACryptoServiceProvider();
+                (rsaCryptoServiceProvider as RSA).ImportParameters(parameters);
+                rsaAlgorithm.rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsaCryptoServiceProvider);
 #endif
                 return rsaAlgorithm;
             }
