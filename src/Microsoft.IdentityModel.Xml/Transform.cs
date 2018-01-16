@@ -25,30 +25,23 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Security.Cryptography;
-
-namespace Microsoft.IdentityModel.Tokens.Xml
+namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
-    /// Defines a XML transform that applies C14n canonicalization and produces a hash over the transformed XML nodes.
+    /// Defines a XMLTransform
     /// </summary>
-    public abstract class CanonicalizingTransfrom : Transform
+    public abstract class Transform
     {
         /// <summary>
-        /// Gets or sets a value indicating if this transform should include comments.
+        /// Called to transform a <see cref="XmlTokenStream"/>
         /// </summary>
-        public bool IncludeComments
-        {
-            get;
-            set;
-        }
+        /// <param name="tokenStream">the <see cref="XmlTokenStream"/> to process.</param>
+        /// <returns></returns>
+        public abstract XmlTokenStream Process(XmlTokenStream tokenStream);
 
         /// <summary>
-        /// Processes a set of XML nodes and returns the hash of the octets.
+        /// Gets or sets the algorithm
         /// </summary>
-        /// <param name="tokenStream">the <see cref="XmlTokenStream"/> that has the XML nodes to process.</param>
-        /// <param name="hashAlg">the <see cref="HashAlgorithm"/>to use</param>
-        /// <returns>the hash of the processed XML nodes.</returns>
-        public abstract byte[] ProcessAndDigest(XmlTokenStream tokenStream, HashAlgorithm hashAlg);
+        public string Algorithm { get; set; }
     }
 }

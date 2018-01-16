@@ -25,52 +25,30 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Text;
+using System.Security.Cryptography;
 
-namespace Microsoft.IdentityModel.Tokens.Xml
+namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
-    /// Utilities for working with XML
+    /// Defines a XML transform that applies C14n canonicalization and produces a hash over the transformed XML nodes.
     /// </summary>
-    internal static class XmlUtil
+    public abstract class CanonicalizingTransfrom : Transform
     {
-        private static Dictionary<byte, string> _hexDictionary = new Dictionary<byte, string>
+        /// <summary>
+        /// Gets or sets a value indicating if this transform should include comments.
+        /// </summary>
+        public bool IncludeComments
         {
-            { 0, "0" },
-            { 1, "1" },
-            { 2, "2" },
-            { 3, "3" },
-            { 4, "4" },
-            { 5, "5" },
-            { 6, "6" },
-            { 7, "7" },
-            { 8, "8" },
-            { 9, "9" },
-            { 10, "A" },
-            { 11, "B" },
-            { 12, "C" },
-            { 13, "D" },
-            { 14, "E" },
-            { 15, "F" }
-        };
+            get;
+            set;
+        }
 
         /// <summary>
-        /// 
+        /// Processes a set of XML nodes and returns the hash of the octets.
         /// </summary>
-        /// <param name="bytes"></param>
-        /// <returns>Hex representation of bytes</returns>
-        internal static string GenerateHexString(byte[] bytes)
-        {
-            var stringBuilder = new StringBuilder();
-
-            foreach (var b in bytes)
-            {
-                stringBuilder.Append(_hexDictionary[(byte)(b >> 4)]);
-                stringBuilder.Append(_hexDictionary[(byte)(b & (byte)0x0F)]);
-            }
-
-            return stringBuilder.ToString();
-        }
+        /// <param name="tokenStream">the <see cref="XmlTokenStream"/> that has the XML nodes to process.</param>
+        /// <param name="hashAlg">the <see cref="HashAlgorithm"/>to use</param>
+        /// <returns>the hash of the processed XML nodes.</returns>
+        public abstract byte[] ProcessAndDigest(XmlTokenStream tokenStream, HashAlgorithm hashAlg);
     }
 }
