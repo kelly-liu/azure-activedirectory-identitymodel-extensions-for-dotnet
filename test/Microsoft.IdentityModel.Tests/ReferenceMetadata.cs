@@ -409,7 +409,7 @@ namespace Microsoft.IdentityModel.Tests
                 reference.DigestMethod = AADCommonMetadataReferenceDigestMethod;
                 reference.DigestValue = AdfsV3ReferenceDigestValue;
                 reference.Transforms.Add(AADCommonMetadataReferenceEnvelopedTransform);
-                reference.Transforms.Add(AADCommonMetadataReferenceC14nTransform);
+                reference.CanonicalizingTransfrom = AADCommonMetadataReferenceC14nTransform;
                 reference.TokenStream = new XmlTokenStream();
                 reference.Uri = AdfsV3ReferenceURI;
                 return reference;
@@ -435,7 +435,7 @@ namespace Microsoft.IdentityModel.Tests
                 reference.DigestMethod = AADCommonMetadataReferenceDigestMethod;
                 reference.DigestValue = AdfsV4ReferenceDigestValue;
                 reference.Transforms.Add(AADCommonMetadataReferenceEnvelopedTransform);
-                reference.Transforms.Add(AADCommonMetadataReferenceC14nTransform);
+                reference.CanonicalizingTransfrom = AADCommonMetadataReferenceC14nTransform;
                 reference.TokenStream = new XmlTokenStream();
                 reference.Uri = AdfsV4ReferenceURI;
                 return reference;

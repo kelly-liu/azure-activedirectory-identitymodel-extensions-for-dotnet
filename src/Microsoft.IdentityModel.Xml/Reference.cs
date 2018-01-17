@@ -46,6 +46,7 @@ namespace Microsoft.IdentityModel.Xml
         private string _digestMethod;
         private string _digestValue;
         private XmlTokenStream _tokenStream;
+        private TransformFactory _transformFactory = TransformFactory.Default;
 
         /// <summary>
         /// Initializes an instance of <see cref="Reference"/>
@@ -66,10 +67,10 @@ namespace Microsoft.IdentityModel.Xml
 
             foreach (var transform in transforms)
             {
-                if (TransformFactory.Default.IsSupportedTransform(transform))
-                    Transforms.Add(TransformFactory.Default.GetTransform(transform));
-                else if (TransformFactory.Default.IsSupportedCanonicalizingTransfrom(transform))
-                    CanonicalizingTransfrom = TransformFactory.Default.GetCanonicalizingTransform(transform);
+                if (TransformFactory.IsSupportedTransform(transform))
+                    Transforms.Add(TransformFactory.GetTransform(transform));
+                else if (TransformFactory.IsSupportedCanonicalizingTransfrom(transform))
+                    CanonicalizingTransfrom = TransformFactory.GetCanonicalizingTransform(transform);
                 else
                     throw LogExceptionMessage(new NotSupportedException(FormatInvariant(LogMessages.IDX14210, transform)));
             }
@@ -112,6 +113,16 @@ namespace Microsoft.IdentityModel.Xml
         {
             get => _tokenStream;
             set => _tokenStream = value ?? throw LogArgumentNullException(nameof(value));
+        }
+
+        /// <summary>
+        /// Gets or set the <see cref="TransformFactory"/> to use when processing references.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
+        public TransformFactory TransformFactory
+        {
+            get => _transformFactory;
+            set => _transformFactory = value ?? throw LogArgumentNullException(nameof(value));
         }
 
         /// <summary>
@@ -209,7 +220,7 @@ namespace Microsoft.IdentityModel.Xml
 
                 // specification requires last transform to be a canonicalizing transform
                 // see: https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-ReferenceProcessingModel
-                for (int i = 0;  i < Transforms.Count-1; i++)
+                for (int i = 0;  i < Transforms.Count; i++)
                     TokenStream = Transforms[i].Process(TokenStream);
 
                 return CanonicalizingTransfrom.ProcessAndDigest(TokenStream, hashAlg);

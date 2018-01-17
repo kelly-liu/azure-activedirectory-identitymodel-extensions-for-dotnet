@@ -860,6 +860,20 @@ namespace Microsoft.IdentityModel.Xml
                 writer.WriteEndElement();
             }
             
+            // Write Canonicalizing transform
+            if (reference.CanonicalizingTransfrom != null)
+            {
+                // <Transform>
+                writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
+
+                // @Algorithm
+                writer.WriteAttributeString(XmlSignatureConstants.Attributes.Algorithm, reference.CanonicalizingTransfrom.Algorithm);
+
+                // </Transform>
+                writer.WriteEndElement();
+
+            }
+
             // </Transforms>
             writer.WriteEndElement();
 

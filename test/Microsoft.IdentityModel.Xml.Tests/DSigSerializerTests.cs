@@ -300,7 +300,8 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     SignedInfoTest(SignedInfoTestSet.ReferenceMissing,
                         new ExpectedException(typeof(XmlReadException), "IDX30011: Unable to read XML. Expecting XmlReader to be at ns.element: 'http://www.w3.org/2000/09/xmldsig#.Reference'")),
                     SignedInfoTest(SignedInfoTestSet.ReferenceDigestValueNotBase64),
-                    SignedInfoTest(SignedInfoTestSet.UnknownReferenceTransform),
+                    SignedInfoTest(SignedInfoTestSet.UnknownReferenceTransform,
+                        new ExpectedException(typeof(XmlReadException), "IDX14210:")),
                     SignedInfoTest(SignedInfoTestSet.Valid),
                     SignedInfoTest(SignedInfoTestSet.SignedInfoEmpty,
                         new ExpectedException(typeof(XmlReadException), "IDX30022:"))

@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Tokens;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
@@ -42,6 +43,11 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         /// <summary>
+        /// Gets the Algorithm associated with this transform
+        /// </summary>
+        public override string Algorithm { get => SecurityAlgorithms.EnvelopedSignature; }
+
+        /// <summary>
         /// Sets the reader to exclude the &lt;Signature> element
         /// </summary>
         /// <param name="tokenStream"><see cref="XmlTokenStream"/>to process.</param>
@@ -51,7 +57,7 @@ namespace Microsoft.IdentityModel.Xml
             if (tokenStream == null)
                 throw LogArgumentNullException(nameof(tokenStream));
 
-            tokenStream.SetElementExclusion("Signature", "http://www.w3.org/2000/09/xmldsig#");
+            tokenStream.SetElementExclusion(XmlSignatureConstants.Elements.Signature, "http://www.w3.org/2000/09/xmldsig#");
             return tokenStream;
         }
     }

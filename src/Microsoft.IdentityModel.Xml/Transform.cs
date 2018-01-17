@@ -40,8 +40,8 @@ namespace Microsoft.IdentityModel.Xml
         public abstract XmlTokenStream Process(XmlTokenStream tokenStream);
 
         /// <summary>
-        /// Gets or sets the algorithm
+        /// Gets the algorithm
         /// </summary>
-        public string Algorithm { get; set; }
+        public abstract string Algorithm { get; }
     }
 }
