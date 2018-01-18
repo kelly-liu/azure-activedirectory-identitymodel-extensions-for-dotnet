@@ -491,7 +491,7 @@ namespace Microsoft.IdentityModel.Xml
                 while (reader.IsStartElement(XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace))
                 {
                     var isEmptyElement = reader.IsEmptyElement;
-                    var algorithm = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
+                    var algorithm = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm);
                     if (string.IsNullOrEmpty(algorithm))
                         throw XmlUtil.LogReadException(LogMessages.IDX30105);
 
@@ -501,10 +501,10 @@ namespace Microsoft.IdentityModel.Xml
                     else if (TransformFactory.IsSupportedCanonicalizingTransfrom(algorithm))
                     {
                         reference.CanonicalizingTransfrom = TransformFactory.GetCanonicalizingTransform(algorithm);
-                        if (reader.IsStartElement(XmlSignatureConstants.Elements.InclusiveNamespaces))
+                        if (reader.IsStartElement(XmlSignatureConstants.Elements.InclusiveNamespaces, XmlSignatureConstants.Namespace))
                         {
                             reader.ReadStartElement();
-                            reference.CanonicalizingTransfrom.InclusivePrefixList = reader.GetAttribute(XmlSignatureConstants.Attributes.PrefixList, null);
+                            reference.CanonicalizingTransfrom.InclusivePrefixList = reader.GetAttribute(XmlSignatureConstants.Attributes.PrefixList);
                         }
                     }
                     else
@@ -513,10 +513,7 @@ namespace Microsoft.IdentityModel.Xml
                     reader.Read();
                     reader.MoveToContent();
                     if (!isEmptyElement)
-                    {
-                        reader.MoveToContent();
                         reader.ReadEndElement();
-                    }
                 }
 
                 // </ Transforms>
