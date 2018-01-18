@@ -1108,7 +1108,13 @@ namespace Microsoft.IdentityModel.Tests
 
     public class TransformsTestSet : XmlTestSet
     {
-        public IList<string> Transforms
+        public Reference Reference
+        {
+            get;
+            set;
+        }
+
+        public IList<Transform> Transforms
         {
             get;
             set;
@@ -1120,7 +1126,8 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new TransformsTestSet
                 {
-                    Transforms = new List<string>(),
+                    Reference = new Reference(),
+                    Transforms = new List<Transform>(),
                     TestId = nameof(TransformsEmpty),
                     Xml = "<Transforms/>"
                 };

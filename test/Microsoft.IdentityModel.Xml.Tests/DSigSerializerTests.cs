@@ -409,13 +409,13 @@ namespace Microsoft.IdentityModel.Xml.Tests
         [Theory, MemberData(nameof(ReadTransformTheoryData))]
         public void ReadTransform(DSigSerializerTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ReadTransform", theoryData);
-            var context = new CompareContext($"{this}.ReadTransform, {theoryData.TestId}");
+            var context = TestUtilities.WriteHeader($"{this}.ReadTransform", theoryData);
             try
             {
-                var transform = theoryData.Serializer.ReadTransform(XmlUtilities.CreateDictionaryReader(theoryData.Xml));
+                var reference = new Reference();
+                theoryData.Serializer.ReadTransforms(XmlUtilities.CreateDictionaryReader(theoryData.Xml), reference);
                 theoryData.ExpectedException.ProcessNoException(context);
-                IdentityComparer.AreEqual(transform, theoryData.Transform, context);
+                IdentityComparer.AreEqual(reference.Transforms, theoryData.Transforms, context);
             }
             catch (Exception ex)
             {
@@ -469,9 +469,10 @@ namespace Microsoft.IdentityModel.Xml.Tests
             var context = new CompareContext($"{this}.ReadTransforms, {theoryData.TestId}");
             try
             {
-                var transforms = theoryData.Serializer.ReadTransforms(XmlUtilities.CreateDictionaryReader(theoryData.Xml));
+                var reference = new Reference();
+                theoryData.Serializer.ReadTransforms(XmlUtilities.CreateDictionaryReader(theoryData.Xml), reference);
                 theoryData.ExpectedException.ProcessNoException(context);
-                IdentityComparer.AreEqual(transforms, theoryData.Transforms, context);
+                IdentityComparer.AreEqual(reference, theoryData.Reference, context);
             }
             catch (Exception ex)
             {
@@ -501,6 +502,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             {
                 ExpectedException = expectedException ?? ExpectedException.NoExceptionExpected,
                 First = first,
+                Reference = testSet.Reference,
                 TestId = testSet.TestId ?? nameof(testSet),
                 Transforms = testSet.Transforms,
                 Xml = testSet.Xml,
@@ -614,7 +616,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             set;
         }
 
-        public IList<string> Transforms
+        public IList<Transform> Transforms
         {
             get;
             set;
