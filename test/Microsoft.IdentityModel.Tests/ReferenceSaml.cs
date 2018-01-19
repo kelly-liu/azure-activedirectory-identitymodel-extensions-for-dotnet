@@ -44,15 +44,15 @@ namespace Microsoft.IdentityModel.Tests
             {
                 var reference = new Reference
                 {
+                    CanonicalizingTransfrom = new ExclusiveCanonicalizationTransform(),
                     DigestMethod = "http://www.w3.org/2001/04/xmlenc#sha256",
                     DigestValue = "JaDhvSguu/XZ8jZmh7KmhbOr4deZB4/iL1adETm9oPc=",
+                    Prefix = "",
                     TokenStream = Default.TokenStream,
                     Uri = "#091a00cc-4361-4303-9f1a-d4be45b2b84c"
                 };
 
                 reference.Transforms.Add(new EnvelopedSignatureTransform());
-                reference.CanonicalizingTransfrom = new ExclusiveCanonicalizationTransform();
-
                 var signature = new Signature
                 {
                     KeyInfo = new KeyInfo(KeyingMaterial.AADSigningCert),
@@ -60,12 +60,10 @@ namespace Microsoft.IdentityModel.Tests
                     SignedInfo = new SignedInfo(reference)
                 };
 
-                var assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstantString), SamlConditions, null, new Collection<SamlStatement> { SamlAttributeStatement })
+                return new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstantString), SamlConditions, null, new Collection<SamlStatement> { SamlAttributeStatement })
                 {
                     Signature = signature
                 };
-
-                return assertion;
             }
         }
 
@@ -81,7 +79,12 @@ namespace Microsoft.IdentityModel.Tests
 
         public static SamlSubject SamlSubject
         {
-            get => new SamlSubject(string.Empty, string.Empty, string.Empty, new string[] { Default.SamlConfirmationMethod }, string.Empty);
+            get
+            {
+                var subject = new SamlSubject();
+                subject.ConfirmationMethods.Add(Default.SamlConfirmationMethod);
+                return subject;
+            }
         }
 
         public static SamlAttributeStatement SamlAttributeStatement

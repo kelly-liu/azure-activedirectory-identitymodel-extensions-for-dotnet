@@ -138,12 +138,14 @@ namespace Microsoft.IdentityModel.Tests
             set;
         }
 
-        public static TransformTestSet UnknownTransform
+        public CanonicalizingTransfrom CanonicalizingTransfrom { get; set; }
+
+        public static TransformTestSet AlgorithmUnknown
         {
             get => new TransformTestSet
             {
-                TestId = nameof(UnknownTransform),
-                Xml = XmlGenerator.TransformsXml(new List<string>{ XmlGenerator.TransformXml(DSigPrefix, "Algorithm", SecurityAlgorithms.Aes128CbcHmacSha256, "") })
+                TestId = nameof(AlgorithmUnknown),
+                Xml = XmlGenerator.TransformsXml(DSigPrefix, new List<string> { XmlGenerator.TransformXml(DSigPrefix, "Algorithm", SecurityAlgorithms.Aes128CbcHmacSha256, "") }, DSigNS)
             };
         }
 
@@ -152,80 +154,131 @@ namespace Microsoft.IdentityModel.Tests
             get => new TransformTestSet
             {
                 TestId = nameof(AlgorithmNull),
-                Xml = XmlGenerator.TransformsXml(new List<string> { XmlGenerator.TransformXml(DSigPrefix, "Algorithm", null, "") })
+                Xml = XmlGenerator.TransformsXml(DSigPrefix, new List <string> { XmlGenerator.TransformXml(DSigPrefix, "Algorithm", null, "") }, DSigNS)
             };
         }
 
-        public static TransformTestSet Enveloped_AlgorithmMissing
+        public static TransformTestSet ElementUnknown
         {
             get => new TransformTestSet
             {
-                TestId = nameof(Enveloped_AlgorithmMissing),
-                Xml = XmlGenerator.TransformsXml(new List<string> { XmlGenerator.TransformXml(DSigPrefix, "_Algorithm", SecurityAlgorithms.EnvelopedSignature, "") })
+                TestId = nameof(ElementUnknown),
+                Xml = XmlGenerator.TransformsXml(DSigPrefix, new List<string> { XmlGenerator.TransformXml(DSigPrefix, "ElementUnknown", "Algorithm", SecurityAlgorithms.Aes128CbcHmacSha256, "") }, DSigNS)
             };
         }
 
-        public static TransformTestSet Enveloped_Valid_WithPrefix
+        public static TransformTestSet Enveloped_AlgorithmAttributeMissing
         {
             get => new TransformTestSet
             {
-                TestId = nameof(Enveloped_Valid_WithPrefix),
+                TestId = nameof(Enveloped_AlgorithmAttributeMissing),
+                Xml = XmlGenerator.TransformsXml(DSigPrefix, new List<string> { XmlGenerator.TransformXml(DSigPrefix, "_Algorithm", SecurityAlgorithms.EnvelopedSignature, "") }, DSigNS)
+            };
+        }
+
+        public static TransformTestSet Enveloped
+        {
+            get => new TransformTestSet
+            {
+                TestId = nameof(Enveloped),
                 Transform = new EnvelopedSignatureTransform(),
-                Xml = XmlGenerator.TransformsXml(new List<string> { XmlGenerator.TransformXml(DSigPrefix, "Algorithm", SecurityAlgorithms.EnvelopedSignature, DSigNS) })
+                Xml = XmlGenerator.TransformsXml(DSigPrefix, new List<string> { XmlGenerator.TransformXml(DSigPrefix, "Algorithm", SecurityAlgorithms.EnvelopedSignature, "") }, DSigNS)
             };
         }
 
-        public static TransformTestSet Enveloped_Valid_WithoutPrefix
+        public static TransformTestSet Enveloped_WithNS
         {
             get => new TransformTestSet
             {
-                TestId = nameof(Enveloped_Valid_WithoutPrefix),
+                TestId = nameof(Enveloped_WithNS),
                 Transform = new EnvelopedSignatureTransform(),
-                Xml = XmlGenerator.TransformsXml(new List<string> { XmlGenerator.TransformXml(DSigPrefix, "Algorithm", SecurityAlgorithms.EnvelopedSignature, DSigNS) })
+                Xml = XmlGenerator.TransformsXml(DSigPrefix,new List <string> { XmlGenerator.TransformXml(DSigPrefix, "Algorithm", SecurityAlgorithms.EnvelopedSignature, DSigNS) }, DSigNS)
             };
         }
 
-        public static TransformTestSet C14n_CanonicalizationMethod_WithComments
+        public static TransformTestSet Enveloped_WithoutPrefix
         {
             get => new TransformTestSet
             {
-                TestId = nameof(C14n_CanonicalizationMethod_WithComments),
-                Xml = XmlGenerator.TransformsXml(new List<string> { XmlGenerator.TransformXml(DSigPrefix, Elements.CanonicalizationMethod, "Algorithm", SecurityAlgorithms.ExclusiveC14nWithComments, DSigNS) })
-            };
-        }
-
-        public static TransformTestSet C14n_ElementNotValid
-        {
-            get => new TransformTestSet
-            {
-                TestId = nameof(C14n_ElementNotValid),
+                TestId = nameof(Enveloped_WithoutPrefix),
                 Transform = new EnvelopedSignatureTransform(),
-                Xml = XmlGenerator.TransformsXml(new List<string> { XmlGenerator.TransformXml(DSigPrefix, Elements.DigestMethod, "Algorithm", SecurityAlgorithms.EnvelopedSignature, DSigNS) })
+                Xml = XmlGenerator.TransformsXml(DSigPrefix, new List <string> { XmlGenerator.TransformXml("", "Algorithm", SecurityAlgorithms.EnvelopedSignature, "") }, DSigNS)
             };
         }
 
-        public static TransformTestSet C14n_Transform_WithComments
-        {
-            get => new TransformTestSet
-            {   TestId = nameof(C14n_Transform_WithComments),
-                Xml = XmlGenerator.TransformsXml(new List<string> { XmlGenerator.TransformXml(DSigPrefix, Elements.Transform, "Algorithm", SecurityAlgorithms.ExclusiveC14nWithComments, DSigNS) })
-            };
-        }
-
-        public static TransformTestSet C14n_Transform_WithoutNS
+        public static TransformTestSet C14n_WithComments
         {
             get => new TransformTestSet
             {
-                TestId = nameof(C14n_Transform_WithoutNS),
-                Xml = XmlGenerator.TransformsXml(new List<string> { XmlGenerator.TransformXml(DSigPrefix, Elements.Transform, "Algorithm", SecurityAlgorithms.ExclusiveC14n, "") })
+                CanonicalizingTransfrom = new ExclusiveCanonicalizationTransform(true),
+                TestId = nameof(C14n_WithComments),
+                Xml = XmlGenerator.TransformsXml(DSigPrefix, new List<string> { XmlGenerator.TransformXml(DSigPrefix, "Algorithm", SecurityAlgorithms.ExclusiveC14nWithComments, "") }, DSigNS)
             };
         }
+
+        public static TransformTestSet C14n_WithInclusivePrefix
+        {
+            get => new TransformTestSet
+            {
+                CanonicalizingTransfrom = new ExclusiveCanonicalizationTransform(true) { InclusivePrefixList = "#default saml ds xs xsi" },
+                TestId = nameof(C14n_WithInclusivePrefix),
+                Xml = XmlGenerator.TransformsXml(DSigPrefix, new List<string> { XmlGenerator.TransformWithInclusivePrefixXml(DSigPrefix, "Algorithm", SecurityAlgorithms.ExclusiveC14nWithComments, "", "<InclusiveNamespaces PrefixList=\"#default saml ds xs xsi\" xmlns=\"http://www.w3.org/2001/10/xml-exc-c14n#\" />" ) }, DSigNS)
+            };
+        }
+
+        public static TransformTestSet C14n_WithComments_WithoutPrefix
+        {
+            get => new TransformTestSet
+            {
+                TestId = nameof(C14n_WithComments_WithoutPrefix),
+                Xml = XmlGenerator.TransformsXml(DSigPrefix, new List<string> { XmlGenerator.TransformXml("", "Algorithm", SecurityAlgorithms.ExclusiveC14nWithComments, "") }, DSigNS)
+            };
+        }
+
+        public static TransformTestSet C14n_WithComments_WithNS
+        {
+            get => new TransformTestSet
+            {
+                CanonicalizingTransfrom = new ExclusiveCanonicalizationTransform(true),
+                TestId = nameof(C14n_WithComments_WithNS),
+                Xml = XmlGenerator.TransformsXml(DSigPrefix, new List<string> { XmlGenerator.TransformXml(DSigPrefix, "Algorithm", SecurityAlgorithms.ExclusiveC14nWithComments, DSigNS) }, DSigNS)
+            };
+        }
+
+        public static TransformTestSet C14n_WithoutComments
+        {
+            get => new TransformTestSet
+            {
+                CanonicalizingTransfrom = new ExclusiveCanonicalizationTransform(false),
+                TestId = nameof(C14n_WithoutComments),
+                Xml = XmlGenerator.TransformsXml(DSigPrefix, new List<string> { XmlGenerator.TransformXml(DSigPrefix, "Algorithm", SecurityAlgorithms.ExclusiveC14n, "") }, DSigNS)
+            };
+        }
+
+        public static TransformTestSet C14n_WithNS
+        {
+            get => new TransformTestSet
+            {
+                TestId = nameof(C14n_WithNS),
+                Xml = XmlGenerator.TransformsXml(DSigPrefix, new List<string> { XmlGenerator.TransformXml(DSigPrefix, "Algorithm", SecurityAlgorithms.ExclusiveC14n, "") }, DSigNS)
+            };
+        }
+
+        public static TransformTestSet C14n_WithoutNS
+        {
+            get => new TransformTestSet
+            {
+                TestId = nameof(C14n_WithoutNS),
+                Xml = XmlGenerator.TransformsXml(DSigPrefix, new List<string> { XmlGenerator.TransformXml("", "Algorithm", SecurityAlgorithms.ExclusiveC14n, "") }, DSigNS)
+            };
+        }
+
         public static TransformTestSet TransformNull
         {
             get => new TransformTestSet
             {
                 TestId = nameof(TransformNull),
-                Xml = XmlGenerator.TransformsXml(new List<string> { XmlGenerator.TransformXml(DSigPrefix, Elements.Transform, "Algorithm", null, "") })
+                Xml = XmlGenerator.TransformsXml(DSigPrefix, new List<string> { XmlGenerator.TransformXml(DSigPrefix, "Algorithm", null, "") }, DSigNS)
             };
         }
     }

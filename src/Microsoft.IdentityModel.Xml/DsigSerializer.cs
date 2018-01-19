@@ -486,8 +486,8 @@ namespace Microsoft.IdentityModel.Xml
                 }
 
                 reader.Read();
-
                 // <Transform> - unbounded
+
                 while (reader.IsStartElement(XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace))
                 {
                     var isEmptyElement = reader.IsEmptyElement;
@@ -496,21 +496,26 @@ namespace Microsoft.IdentityModel.Xml
                         throw XmlUtil.LogReadException(LogMessages.IDX30105);
 
                     if (TransformFactory.IsSupportedTransform(algorithm))
+                    {
                         reference.Transforms.Add(TransformFactory.GetTransform(algorithm));
-                    // TODO - extra parameters
+                        reader.Read();
+                    }
                     else if (TransformFactory.IsSupportedCanonicalizingTransfrom(algorithm))
                     {
                         reference.CanonicalizingTransfrom = TransformFactory.GetCanonicalizingTransform(algorithm);
-                        if (reader.IsStartElement(XmlSignatureConstants.Elements.InclusiveNamespaces, XmlSignatureConstants.Namespace))
+                        reader.Read();
+                        if (reader.IsStartElement(XmlSignatureConstants.Elements.InclusiveNamespaces))
                         {
-                            reader.ReadStartElement();
+                            bool isOnEmptyElement = reader.IsEmptyElement;
                             reference.CanonicalizingTransfrom.InclusivePrefixList = reader.GetAttribute(XmlSignatureConstants.Attributes.PrefixList);
+                            reader.ReadStartElement();
+                            if (!isOnEmptyElement)
+                                reader.ReadEndElement();
                         }
                     }
                     else
-                        throw XmlUtil.LogReadException(LogMessages.IDX14210, algorithm);
+                        throw XmlUtil.LogReadException(LogMessages.IDX30210, algorithm);
 
-                    reader.Read();
                     reader.MoveToContent();
                     if (!isEmptyElement)
                         reader.ReadEndElement();

@@ -360,7 +360,7 @@ namespace Microsoft.IdentityModel.Tests
 #if !CrossVersionTokenValidation
         public static Reference ReferenceWithNullTokenStream
         {
-            get => new Reference(new List<string> { SecurityAlgorithms.EnvelopedSignature, SecurityAlgorithms.ExclusiveC14n })
+            get => new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform())
             {
                 Id = ReferenceId,
                 DigestMethod = ReferenceDigestMethod,
@@ -373,7 +373,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static Reference Reference
         {
-            get => new Reference(new List<string> { SecurityAlgorithms.EnvelopedSignature, SecurityAlgorithms.ExclusiveC14n })
+            get => new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform())
             {
                 Id = ReferenceId,
                 DigestMethod = ReferenceDigestMethod,

@@ -443,15 +443,25 @@ namespace Microsoft.IdentityModel.Tests
             return string.Format(TransformTemplate, prefix, element, attributeName, algorithm, @namespace);
         }
 
-        public static string TransformsXml(List<string> transforms)
+        public static string TransformsXml(string prefix, List<string> transforms, string @namespace)
         {
             var stringBuilder = new StringBuilder();
-            stringBuilder.Append($"<ds:Transforms xmlns:ds=\"{XmlSignatureConstants.Namespace}\">");
+            stringBuilder.Append($"<{prefix}Transforms {@namespace}>");
             foreach (var transform in transforms)
                 stringBuilder.Append(transform);
-            stringBuilder.Append("</ds:Transforms >");
+            stringBuilder.Append($"</{prefix}Transforms >");
 
             return stringBuilder.ToString();
+        }
+
+        public static string TransformTemplateWithInclusivePrefix
+        {
+            get => "<{0}{1} {2} = \"{3}\"> {4} </{0}{1}>";
+        }
+
+        public static string TransformWithInclusivePrefixXml(string prefix, string attributeName, string algorithm, string @namespace, string inclusivePrefix)
+        {
+            return string.Format(TransformTemplateWithInclusivePrefix, prefix, XmlSignatureConstants.Elements.Transform, attributeName, algorithm, inclusivePrefix);
         }
     }
 }
